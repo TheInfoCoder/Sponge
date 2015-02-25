@@ -24,63 +24,59 @@
  */
 package org.spongepowered.mod.text.action;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.item.inventory.ItemStack;
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.Entity;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.StatBase;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
-import org.spongepowered.api.text.message.Message;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.mod.text.SpongeText;
 
-@NonnullByDefault
-public class SpongeHoverAction<R> implements HoverAction<R> {
+public class SpongeHoverAction {
 
-    private final String id;
-    private final R result;
+    private SpongeHoverAction() {}
 
-    public SpongeHoverAction(String id, R result) {
-        this.id = id;
-        this.result = result;
-    }
+    private static final ImmutableMap<Class<? extends HoverAction<?>>, HoverEvent.Action> TYPES = ImmutableMap.of(
+            HoverAction.ShowText.class, HoverEvent.Action.SHOW_TEXT,
+            HoverAction.ShowAchievement.class, HoverEvent.Action.SHOW_ACHIEVEMENT,
+            HoverAction.ShowItem.class, HoverEvent.Action.SHOW_ITEM,
+            HoverAction.ShowEntity.class, HoverEvent.Action.SHOW_ENTITY
+    );
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public R getResult() {
-        return this.result;
-    }
-
-    public static class ShowText extends SpongeHoverAction<Message> implements HoverAction.ShowText {
-
-        public ShowText(String id, Message result) {
-            super(id, result);
+    @SuppressWarnings("unchecked")
+    public static HoverEvent getHandle(HoverAction<?> action) {
+        Class<? extends HoverAction<?>> actionClass = (Class<? extends HoverAction<?>>) action.getClass();
+        HoverEvent.Action type = TYPES.get(actionClass);
+        if (type == null) {
+            throw new UnsupportedOperationException(actionClass.toString());
         }
 
-    }
+        IChatComponent component;
 
-    public static class ShowItem extends SpongeHoverAction<ItemStack> implements HoverAction.ShowItem {
-
-        public ShowItem(String id, ItemStack result) {
-            super(id, result);
+        switch (type) {
+            case SHOW_ACHIEVEMENT:
+                component = new ChatComponentText(((StatBase) action.getResult()).statId);
+                break;
+            case SHOW_ENTITY:
+                return ((Entity) action.getResult()).getHoverEvent();
+            case SHOW_ITEM:
+                net.minecraft.item.ItemStack item = (net.minecraft.item.ItemStack) action.getResult();
+                NBTTagCompound nbt = new NBTTagCompound();
+                item.writeToNBT(nbt);
+                component = new ChatComponentText(nbt.toString());
+                break;
+            case SHOW_TEXT:
+                component = ((SpongeText) action.getResult()).toComponent();
+                break;
+            default:
+                throw new AssertionError();
         }
 
+        return new HoverEvent(type, component);
     }
 
-    // TODO Replace Object with Achievement
-    public static class ShowAchievement extends SpongeHoverAction<Object> implements HoverAction.ShowAchievement {
-
-        public ShowAchievement(String id, Object result) {
-            super(id, result);
-        }
-
-    }
-
-    public static class ShowEntity extends SpongeHoverAction<Entity> implements HoverAction.ShowEntity {
-
-        public ShowEntity(String id, Entity result) {
-            super(id, result);
-        }
-
-    }
 }

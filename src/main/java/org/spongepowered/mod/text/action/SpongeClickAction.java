@@ -24,61 +24,31 @@
  */
 package org.spongepowered.mod.text.action;
 
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-import java.net.URL;
+public final class SpongeClickAction {
 
-@NonnullByDefault
-public class SpongeClickAction<R> implements ClickAction<R> {
+    private SpongeClickAction() {}
 
-    private final String id;
-    private final R result;
+    private static final ImmutableMap<Class<? extends ClickAction<?>>, ClickEvent.Action> TYPES =
+            ImmutableMap.<Class<? extends ClickAction<?>>, ClickEvent.Action>of(
+                    ClickAction.OpenUrl.class, ClickEvent.Action.OPEN_URL,
+                    ClickAction.RunCommand.class, ClickEvent.Action.RUN_COMMAND,
+                    ClickAction.SuggestCommand.class, ClickEvent.Action.SUGGEST_COMMAND,
+                    ClickAction.ChangePage.class, ClickEvent.Action.CHANGE_PAGE
+            );
 
-    public SpongeClickAction(String id, R result) {
-        this.id = id;
-        this.result = result;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public R getResult() {
-        return this.result;
-    }
-
-    public static class OpenUrl extends SpongeClickAction<URL> implements ClickAction.OpenUrl {
-
-        public OpenUrl(String id, URL result) {
-            super(id, result);
+    @SuppressWarnings("unchecked")
+    public static ClickEvent getHandle(ClickAction<?> action) {
+        Class<? extends ClickAction<?>> actionClass = (Class<? extends ClickAction<?>>) action.getClass();
+        ClickEvent.Action type = TYPES.get(actionClass);
+        if (type == null) {
+            throw new UnsupportedOperationException(actionClass.toString());
         }
 
+        return new ClickEvent(type, action.getResult().toString());
     }
 
-    public static class RunCommand extends SpongeClickAction<String> implements ClickAction.RunCommand {
-
-        public RunCommand(String id, String result) {
-            super(id, result);
-        }
-
-    }
-
-    public static class ChangePage extends SpongeClickAction<Integer> implements ClickAction.ChangePage {
-
-        public ChangePage(String id, Integer result) {
-            super(id, result);
-        }
-
-    }
-
-    public static class SuggestCommand extends SpongeClickAction<String> implements ClickAction.SuggestCommand {
-
-        public SuggestCommand(String id, String result) {
-            super(id, result);
-        }
-
-    }
 }

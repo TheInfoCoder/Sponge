@@ -24,6 +24,7 @@
  */
 package org.spongepowered.mod;
 
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -34,9 +35,11 @@ public class SpongeCoremod implements IFMLLoadingPlugin {
 
     public SpongeCoremod() {
         MixinBootstrap.init();
-        MixinEnvironment.getCurrentEnvironment().addConfiguration("mixins.sponge.core.json");
+        MixinEnvironment env = MixinEnvironment.getCurrentEnvironment();
+        env.addConfiguration("mixins.sponge.core.json");
+        env.addConfiguration("mixins.sponge.api.json");
         // Transformer exclusions
-        ((net.minecraft.launchwrapper.LaunchClassLoader) getClass().getClassLoader()).addTransformerExclusion("ninja.leaping.configurate");
+        Launch.classLoader.addTransformerExclusion("ninja.leaping.configurate");
     }
 
     @Override
