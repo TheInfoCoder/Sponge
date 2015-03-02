@@ -38,6 +38,8 @@ public class SpongeCoremod implements IFMLLoadingPlugin {
         MixinEnvironment env = MixinEnvironment.getCurrentEnvironment();
         env.addConfiguration("mixins.sponge.core.json");
         env.addConfiguration("mixins.sponge.api.json");
+        env.addConfiguration("mixins.sponge.entityactivation.json");
+
         // Transformer exclusions
         Launch.classLoader.addTransformerExclusion("ninja.leaping.configurate");
     }

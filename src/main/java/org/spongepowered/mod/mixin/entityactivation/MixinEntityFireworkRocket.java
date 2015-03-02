@@ -22,27 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.mod.interfaces;
+package org.spongepowered.mod.mixin.entityactivation;
 
-import net.minecraft.entity.Entity;
+import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IMixinEntity {
+@NonnullByDefault
+@Mixin(net.minecraft.entity.item.EntityFireworkRocket.class)
+public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework {
 
-    boolean isTeleporting();
+    @Shadow
+    private int fireworkAge;
 
-    void setIsTeleporting(boolean teleporting);
+    @Override
+    public void inactiveTick() {
+        this.fireworkAge += 1;
+        super.inactiveTick();
+    }
 
-    Entity getTeleportVehicle();
-
-    void setTeleportVehicle(Entity entity);
-
-    byte getActivationType();
-
-    long getActivatedTick();
-
-    boolean getDefaultActivationState();
-
-    void setActivatedTick(long tick);
-
-    void inactiveTick();
 }
