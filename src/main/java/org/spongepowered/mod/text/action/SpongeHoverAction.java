@@ -24,15 +24,12 @@
  */
 package org.spongepowered.mod.text.action;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.mod.text.SpongeText;
 
@@ -40,21 +37,22 @@ public class SpongeHoverAction {
 
     private SpongeHoverAction() {}
 
-    private static final ImmutableMap<Class<? extends HoverAction<?>>, HoverEvent.Action> TYPES = ImmutableMap.of(
-            HoverAction.ShowText.class, HoverEvent.Action.SHOW_TEXT,
-            HoverAction.ShowAchievement.class, HoverEvent.Action.SHOW_ACHIEVEMENT,
-            HoverAction.ShowItem.class, HoverEvent.Action.SHOW_ITEM,
-            HoverAction.ShowEntity.class, HoverEvent.Action.SHOW_ENTITY
-    );
-
-    @SuppressWarnings("unchecked")
-    public static HoverEvent getHandle(HoverAction<?> action) {
-        Class<? extends HoverAction<?>> actionClass = (Class<? extends HoverAction<?>>) action.getClass();
-        HoverEvent.Action type = TYPES.get(actionClass);
-        if (type == null) {
-            throw new UnsupportedOperationException(actionClass.toString());
+    private static HoverEvent.Action getType(HoverAction<?> action) {
+        if (action instanceof HoverAction.ShowAchievement) {
+            return HoverEvent.Action.SHOW_ACHIEVEMENT;
+        } else if (action instanceof HoverAction.ShowEntity) {
+            return HoverEvent.Action.SHOW_ENTITY;
+        } else if (action instanceof HoverAction.ShowItem) {
+            return HoverEvent.Action.SHOW_ITEM;
+        } else if (action instanceof HoverAction.ShowText) {
+            return HoverEvent.Action.SHOW_TEXT;
         }
 
+        throw new UnsupportedOperationException(action.getClass().toString());
+    }
+
+    public static HoverEvent getHandle(HoverAction<?> action) {
+        HoverEvent.Action type = getType(action);
         IChatComponent component;
 
         switch (type) {

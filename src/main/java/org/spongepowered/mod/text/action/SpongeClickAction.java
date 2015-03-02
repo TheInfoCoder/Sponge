@@ -24,7 +24,6 @@
  */
 package org.spongepowered.mod.text.action;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.event.ClickEvent;
 import org.spongepowered.api.text.action.ClickAction;
 
@@ -32,23 +31,22 @@ public final class SpongeClickAction {
 
     private SpongeClickAction() {}
 
-    private static final ImmutableMap<Class<? extends ClickAction<?>>, ClickEvent.Action> TYPES =
-            ImmutableMap.<Class<? extends ClickAction<?>>, ClickEvent.Action>of(
-                    ClickAction.OpenUrl.class, ClickEvent.Action.OPEN_URL,
-                    ClickAction.RunCommand.class, ClickEvent.Action.RUN_COMMAND,
-                    ClickAction.SuggestCommand.class, ClickEvent.Action.SUGGEST_COMMAND,
-                    ClickAction.ChangePage.class, ClickEvent.Action.CHANGE_PAGE
-            );
-
-    @SuppressWarnings("unchecked")
-    public static ClickEvent getHandle(ClickAction<?> action) {
-        Class<? extends ClickAction<?>> actionClass = (Class<? extends ClickAction<?>>) action.getClass();
-        ClickEvent.Action type = TYPES.get(actionClass);
-        if (type == null) {
-            throw new UnsupportedOperationException(actionClass.toString());
+    private static ClickEvent.Action getType(ClickAction<?> action) {
+        if (action instanceof ClickAction.OpenUrl) {
+            return ClickEvent.Action.OPEN_URL;
+        } else if (action instanceof ClickAction.RunCommand) {
+            return ClickEvent.Action.RUN_COMMAND;
+        } else if (action instanceof ClickAction.SuggestCommand) {
+            return ClickEvent.Action.SUGGEST_COMMAND;
+        } else if (action instanceof ClickAction.ChangePage) {
+            return ClickEvent.Action.CHANGE_PAGE;
         }
 
-        return new ClickEvent(type, action.getResult().toString());
+        throw new UnsupportedOperationException(action.getClass().toString());
+    }
+
+    public static ClickEvent getHandle(ClickAction<?> action) {
+        return new ClickEvent(getType(action), action.getResult().toString());
     }
 
 }
