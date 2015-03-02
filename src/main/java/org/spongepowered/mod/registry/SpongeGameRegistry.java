@@ -809,6 +809,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return Optional.<Translation>of(new SpongeTranslation(id));
     }
 
+    @Override
     public Collection<Difficulty> getDifficulties() {
         throw new UnsupportedOperationException(); // TODO
     }

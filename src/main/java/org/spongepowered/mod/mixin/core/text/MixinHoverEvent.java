@@ -31,14 +31,15 @@ import net.minecraft.event.HoverEvent;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.mod.SpongeMod;
 import org.spongepowered.mod.text.SpongeChatComponent;
 import org.spongepowered.mod.text.SpongeHoverEvent;
 
@@ -70,8 +71,15 @@ public abstract class MixinHoverEvent implements SpongeHoverEvent {
                         setHandle(TextActions.showItem((ItemStack) net.minecraft.item.ItemStack.loadItemStackFromNBT(loadNbt())));
                         break;
                     case SHOW_ENTITY:
-                        setHandle(TextActions.showEntity((org.spongepowered.api.entity.Entity) MinecraftServer.getServer().getEntityFromUuid(
-                                UUID.fromString(loadNbt().getString("id")))));
+                        NBTTagCompound nbt = loadNbt();
+                        String name = nbt.getString("name");
+                        EntityType type = null;
+                        if (nbt.hasKey("type", 8)) {
+                            type = SpongeMod.instance.getGame().getRegistry().getEntity(name).orNull();
+                        }
+
+                        UUID uniqueId = UUID.fromString(nbt.getString("id"));
+                        setHandle(TextActions.showEntity(new HoverAction.ShowEntity.Ref(uniqueId, name, type)));
                         break;
                     default:
                 }
