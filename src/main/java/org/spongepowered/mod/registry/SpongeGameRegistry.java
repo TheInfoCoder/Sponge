@@ -126,6 +126,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -806,6 +807,15 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public Optional<Translation> getTranslationById(String id) {
         return Optional.<Translation>of(new SpongeTranslation(id));
+    }
+
+    public Collection<Difficulty> getDifficulties() {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Optional<Difficulty> getDifficulty(String name) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public void registerEnvironment(DimensionType env) {
