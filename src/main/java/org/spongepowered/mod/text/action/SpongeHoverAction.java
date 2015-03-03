@@ -24,18 +24,20 @@
  */
 package org.spongepowered.mod.text.action;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.mod.entity.SpongeEntityType;
 import org.spongepowered.mod.text.SpongeText;
 
 public class SpongeHoverAction {
 
-    private SpongeHoverAction() {}
+    private SpongeHoverAction() {
+    }
 
     private static HoverEvent.Action getType(HoverAction<?> action) {
         if (action instanceof HoverAction.ShowAchievement) {
@@ -59,14 +61,27 @@ public class SpongeHoverAction {
             case SHOW_ACHIEVEMENT:
                 component = new ChatComponentText(((StatBase) action.getResult()).statId);
                 break;
-            case SHOW_ENTITY:
-                return ((Entity) action.getResult()).getHoverEvent();
-            case SHOW_ITEM:
+            case SHOW_ENTITY: {
+                HoverAction.ShowEntity.Ref entity = ((HoverAction.ShowEntity) action).getResult();
+
+                NBTTagCompound nbt = new NBTTagCompound();
+                nbt.setString("id", entity.getUniqueId().toString());
+
+                if (entity.getType().isPresent()) {
+                    nbt.setString("type", EntityList.getStringFromID(((SpongeEntityType) entity.getType().get()).entityTypeId));
+                }
+
+                nbt.setString("name", entity.getName());
+                component = new ChatComponentText(nbt.toString());
+                break;
+            }
+            case SHOW_ITEM: {
                 net.minecraft.item.ItemStack item = (net.minecraft.item.ItemStack) action.getResult();
                 NBTTagCompound nbt = new NBTTagCompound();
                 item.writeToNBT(nbt);
                 component = new ChatComponentText(nbt.toString());
                 break;
+            }
             case SHOW_TEXT:
                 component = ((SpongeText) action.getResult()).toComponent();
                 break;

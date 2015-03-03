@@ -79,7 +79,7 @@ public abstract class MixinHoverEvent implements SpongeHoverEvent {
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));
-                        setHandle(TextActions.showEntity(new HoverAction.ShowEntity.Ref(uniqueId, name, type)));
+                        setHandle(TextActions.showEntity(uniqueId, name, type));
                         break;
                     default:
                 }
